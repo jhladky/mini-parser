@@ -25,6 +25,7 @@ translate
    :  ^(PROGRAM t=types d=declarations f=functions)
          {
             $json = factory.createObjectBuilder()
+               .add("ast_node", "program")
                .add("types", $t.json)
                .add("declarations", $d.json)
                .add("functions", $f.json)
@@ -45,6 +46,7 @@ type_decl
    :  ^(ast=STRUCT id=ID n=nested_decl)
       {
          $json = factory.createObjectBuilder()
+            .add("ast_node", "typeDecl")
             .add("line", $ast.line)
             .add("id", $id.text)
             .add("fields", $n.json)
@@ -64,6 +66,7 @@ field_decl
    :  ^(DECL ^(TYPE t=type) id=ID)
       {
          $json = factory.createObjectBuilder()
+            .add("ast_node", "varDecl")
             .add("line", $id.line)
             .add("type", $t.str)
             .add("id", $id.text)
@@ -91,6 +94,7 @@ decl_list[JsonArrayBuilder abuilder]
          (id=ID
             {
                $abuilder.add(factory.createObjectBuilder()
+                  .add("ast_node", "varDecl")
                   .add("line", $id.line)
                   .add("type", $t.str)
                   .add("id", $id.text)
@@ -114,6 +118,7 @@ function
          s=statement_list)
       {
          $json = factory.createObjectBuilder()
+            .add("ast_node", "function")
             .add("line", $ast.line)
             .add("id", $id.text)
             .add("parameters", $p.json)
@@ -136,6 +141,7 @@ param_decl
    :  ^(DECL ^(TYPE t=type) id=ID)
       {
          $json = factory.createObjectBuilder()
+            .add("ast_node", "varDecl")
             .add("line", $id.line)
             .add("type", $t.str)
             .add("id", $id.text)
@@ -174,6 +180,7 @@ block
    :  ^(BLOCK s=statement_list)
       {
          $json = factory.createObjectBuilder()
+            .add("ast_node", "statement")
             .add("stmt", "block")
             .add("list", $s.json)
             .build();
@@ -193,6 +200,7 @@ assignment
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "statement")
             .add("stmt", "assign")
             .add("source", $e.json)
             .add("target", $l.json)
@@ -207,6 +215,7 @@ print
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "statement")
             .add("stmt", "print")
             .add("exp", $e.json)
             .add("endl", endl)
@@ -220,6 +229,7 @@ read
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "statement")
             .add("stmt", "read")
             .add("target", $l.json)
             .build();
@@ -232,6 +242,7 @@ conditional
       {
          JsonObjectBuilder obuilder = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "statement")
             .add("stmt", "if")
             .add("guard", $g.json)
             .add("then", $t.json);
@@ -251,6 +262,7 @@ loop
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "statement")
             .add("stmt", "while")
             .add("guard", $e.json)
             .add("body", $b.json)
@@ -264,6 +276,7 @@ delete
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "statement")
             .add("stmt", "delete")
             .add("guard", $e.json)
             .build();
@@ -276,6 +289,7 @@ return_stmt
       {
          JsonObjectBuilder obuilder = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "statement")
             .add("stmt", "return");
 
          if ($e.json != null)
@@ -294,6 +308,7 @@ invocation_stmt
       {
          $json = factory.createObjectBuilder()
             .add("line", $id.line)
+            .add("ast_node", "statement")
             .add("stmt", "invocation")
             .add("id", $id.text)
             .add("args", abuilder.build())
@@ -304,10 +319,16 @@ invocation_stmt
 lvalue
    returns [JsonValue json = null]
    :  id=ID
-      { $json = factory.createObjectBuilder().add("id", $id.text).build(); }
+      {
+         $json = factory.createObjectBuilder()
+            .add("id", $id.text)
+            .add("ast_node", "lvalue")
+            .build();
+      }
    |  ^(ast=DOT l=lvalue id=ID)
       {
          $json = factory.createObjectBuilder()
+            .add("ast_node", "expression")
             .add("line", $ast.line)
             .add("left", $l.json)
             .add("id", $id.text)
@@ -323,6 +344,7 @@ expression
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "expression")
             .add("exp", "binary")
             .add("operator", $ast.text)
             .add("lft", $lft.json)
@@ -333,6 +355,7 @@ expression
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "expression")
             .add("exp", "unary")
             .add("operator", "!")
             .add("operand", $e.json)
@@ -342,6 +365,7 @@ expression
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "expression")
             .add("exp", "unary")
             .add("operator", "-")
             .add("operand", $e.json)
@@ -351,6 +375,7 @@ expression
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "expression")
             .add("exp", "dot")
             .add("left", $e.json)
             .add("id", $id.text)
@@ -361,6 +386,7 @@ expression
       {
          $json = factory.createObjectBuilder()
             .add("line", $id.line)
+            .add("ast_node", "expression") 
             .add("exp", "id")
             .add("id", $id.text)
             .build();
@@ -369,6 +395,7 @@ expression
       {
          $json = factory.createObjectBuilder()
             .add("line", $i.line)
+            .add("ast_node", "expression")
             .add("exp", "num")
             .add("value", $i.text)
             .build();
@@ -377,6 +404,7 @@ expression
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "expression")
             .add("exp", "true")
             .build();
       }
@@ -384,12 +412,14 @@ expression
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "expression")
             .add("exp", "false")
             .build(); }
    |  ^(ast=NEW id=ID)
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "expression")
             .add("exp", "new")
             .add("id", $id.text)
             .build();
@@ -398,6 +428,7 @@ expression
       {
          $json = factory.createObjectBuilder()
             .add("line", $ast.line)
+            .add("ast_node", "expression")
             .add("exp", "null")
             .build(); }
    ;
@@ -409,6 +440,7 @@ invocation_exp
       {
          $json = factory.createObjectBuilder()
             .add("line", $id.line)
+            .add("ast_node", "expression")
             .add("exp", "invocation")
             .add("id", $id.text)
             .add("args", abuilder.build())
