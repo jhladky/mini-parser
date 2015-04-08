@@ -321,14 +321,17 @@ lvalue
    :  id=ID
       {
          $json = factory.createObjectBuilder()
-            .add("id", $id.text)
             .add("ast_node", "lvalue")
+            .add("lval", "id")
+            .add("id", $id.text)
+            .add("line", $id.line)
             .build();
       }
    |  ^(ast=DOT l=lvalue id=ID)
       {
          $json = factory.createObjectBuilder()
-            .add("ast_node", "expression")
+            .add("ast_node", "lvalue")
+            .add("lval", "dot")
             .add("line", $ast.line)
             .add("left", $l.json)
             .add("id", $id.text)
